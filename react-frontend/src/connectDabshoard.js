@@ -1,14 +1,12 @@
-import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React, { Component } from "react";
 import { Container } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import CustomizedTreeView from "./treeView";
+import { withStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   div: {
     border: "solid",
-    // height: "660px",
-    // maxHeight: "660px",
   },
   sidepanel: {
     height: "618px",
@@ -16,32 +14,57 @@ const useStyles = makeStyles((theme) => ({
     border: "solid",
     borderWidth: "2px 2px 2px 2px",
     marginBottom: "20px",
+    overflow: "scroll",
   },
   panel: {
     border: "solid",
     borderWidth: "2px 2px 2px 0px",
     marginBottom: "20px",
+    overflow: "scroll",
   },
-}));
+});
 
-export default function ConnectDashboard({ isAdmin, history }) {
-  const classes = useStyles();
+export class ConnectDashboard extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      databases: [],
+      tables: [],
+    };
+  }
 
-  return (
-    <React.Fragment>
-      <Container className={classes.div}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <div style={{ marginTop: "10px" }}>Connect</div>
+  componentDidMount() {
+    this.getDatabases();
+  }
+
+  getDatabases = (_) => {
+    fetch("http://localhost:4000/databases")
+      .then((response) => response.json())
+      .then((response) => this.setState({ databases: response.data }))
+      .catch((err) => console.error(err));
+  };
+
+  render() {
+    const { classes } = this.props;
+    const { databases } = this.state;
+    return (
+      <React.Fragment>
+        <Container className={classes.div}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <div style={{ marginTop: "10px" }}>Connect</div>
+            </Grid>
+            <Grid item xs={3} className={classes.sidepanel}>
+              <CustomizedTreeView databases={databases} />
+            </Grid>
+            <Grid item xs={8} className={classes.panel}>
+              <div>Panel</div>
+            </Grid>
           </Grid>
-          <Grid item xs={3} className={classes.sidepanel}>
-            <CustomizedTreeView />
-          </Grid>
-          <Grid item xs={8} className={classes.panel}>
-            <div>Panel</div>
-          </Grid>
-        </Grid>
-      </Container>
-    </React.Fragment>
-  );
+        </Container>
+      </React.Fragment>
+    );
+  }
 }
+
+export default withStyles(styles)(ConnectDashboard);

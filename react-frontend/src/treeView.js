@@ -85,30 +85,63 @@ const useStyles = makeStyles({
   },
 });
 
-export default function CustomizedTreeView() {
+export default function CustomizedTreeView({ databases }) {
   const classes = useStyles();
+  const [Tables, setTables] = React.useState([]);
+
+  React.useEffect(() => {
+    databases.map((database) => {
+      fetch(`http://localhost:4000/tables?schema="${database.database_name}"`)
+        .then((response) => response.json())
+        .then((response) =>
+          setTables((oldArray) => [...oldArray, response.data])
+        )
+        .catch((err) => console.error(err));
+    });
+  }, [databases]);
+
+  const renderTables = (table, index) => {
+    return (
+      <StyledTreeItem
+        nodeId={table + index}
+        label={table}
+        key={table + index + 1}
+      >
+        <StyledTreeItem
+          nodeId={`Tables-${index + 1}`}
+          label="Tables"
+        ></StyledTreeItem>
+      </StyledTreeItem>
+    );
+  };
+  const renderTreeItems = (database, index) => {
+    const found = Tables.find((element) =>
+      element.find((element) => element.TABLE_SCHEMA === database)
+    );
+    return (
+      <StyledTreeItem nodeId={database} label={database} key={index + 1}>
+        <StyledTreeItem nodeId={`${database}-tables`} label="Tables">
+          {found
+            ? found.map((database, index) => {
+                return renderTables(database.TABLE_NAME, index);
+              })
+            : null}
+        </StyledTreeItem>
+      </StyledTreeItem>
+    );
+  };
 
   return (
     <TreeView
       className={classes.root}
-      defaultExpanded={["1"]}
       defaultCollapseIcon={<MinusSquare />}
       defaultExpandIcon={<PlusSquare />}
       defaultEndIcon={<CloseSquare />}
     >
-      <StyledTreeItem nodeId="1" label="Databases">
-        <StyledTreeItem nodeId="3" label="information_schema">
-          <StyledTreeItem nodeId="7" label="Tables">
-            <StyledTreeItem nodeId="9" label="Child 1" />
-            <StyledTreeItem nodeId="10" label="Child 2" />
-            <StyledTreeItem nodeId="11" label="Child 3" />
-          </StyledTreeItem>
-          <StyledTreeItem nodeId="6" label="Hello" />
-          <StyledTreeItem nodeId="8" label="Hello" />
-        </StyledTreeItem>
-        <StyledTreeItem nodeId="2" label="Hello" />
-        <StyledTreeItem nodeId="4" label="World" />
-        <StyledTreeItem nodeId="5" label="Something something" />
+      <StyledTreeItem nodeId="0" label="Databases">
+        {databases.map((database, index) => {
+          return renderTreeItems(database.database_name, index);
+        })}
       </StyledTreeItem>
     </TreeView>
   );
