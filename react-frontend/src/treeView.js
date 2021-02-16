@@ -90,6 +90,8 @@ export default function CustomizedTreeView({ databases }) {
   const [Tables, setTables] = React.useState([]);
   const [Procedures, setProcedures] = React.useState([]);
   const [Triggers, setTriggers] = React.useState([]);
+  const [Views, setViews] = React.useState([]);
+  const [Indexes, setIndexes] = React.useState([]);
 
   React.useEffect(() => {
     databases.map((database) => {
@@ -110,7 +112,19 @@ export default function CustomizedTreeView({ databases }) {
     });
     fetch(`http://localhost:4000/triggers`)
       .then((response) => response.json())
-      .then((response) => setTriggers(response.data))
+      .then((response) =>
+        setTriggers((oldArray) => [...oldArray, response.data])
+      )
+      .catch((err) => console.error(err));
+    fetch(`http://localhost:4000/views`)
+      .then((response) => response.json())
+      .then((response) => setViews((oldArray) => [...oldArray, response.data]))
+      .catch((err) => console.error(err));
+    fetch(`http://localhost:4000/indexes`)
+      .then((response) => response.json())
+      .then((response) =>
+        setIndexes((oldArray) => [...oldArray, response.data])
+      )
       .catch((err) => console.error(err));
   }, [databases]);
 
@@ -122,8 +136,8 @@ export default function CustomizedTreeView({ databases }) {
         key={table + index + 1}
       >
         <StyledTreeItem
-          nodeId={`Tables-${index + 1}`}
-          label="Tables"
+          nodeId={`COLUMNS-${index + 1}`}
+          label="COLUMNS"
         ></StyledTreeItem>
       </StyledTreeItem>
     );
@@ -155,6 +169,26 @@ export default function CustomizedTreeView({ databases }) {
     );
   };
 
+  const renderViews = (view, index) => {
+    let node = Math.floor(Math.random() * Math.floor(100));
+    return (
+      <StyledTreeItem nodeId={`view-${index + node}`} label={view} key={view}>
+        <StyledTreeItem nodeId={"node"} label="VIEW"></StyledTreeItem>
+      </StyledTreeItem>
+    );
+  };
+
+  const renderIndexes = (tableIndex, index) => {
+    let node = Math.floor(Math.random() * Math.floor(100));
+    return (
+      <StyledTreeItem
+        nodeId={`index-${index + node}`}
+        label={tableIndex}
+        key={tableIndex}
+      ></StyledTreeItem>
+    );
+  };
+
   const renderTreeItems = (database, index) => {
     const foundTables = Tables.find((element) =>
       element.find((element) => element.TABLE_SCHEMA === database)
@@ -162,34 +196,77 @@ export default function CustomizedTreeView({ databases }) {
     const foundProcedures = Procedures.find((element) =>
       element.find((element) => element.ROUTINE_SCHEMA === database)
     );
-    const foundTrigger = Triggers.find(
-      (element) => element.trigger_schema === database
+    const foundTrigger = Triggers.find((element) =>
+      element.find((element) => element.trigger_schema === database)
     );
-
+    const foundView = Views.find((element) =>
+      element.find((element) => element.TABLE_SCHEMA === database)
+    );
+    const foundIndex = Indexes.find((element) =>
+      element.find((element) => element.TABLE_SCHEMA === database)
+    );
     return (
       <StyledTreeItem nodeId={database} label={database} key={index + 1}>
-        <StyledTreeItem nodeId={`${database}-tables`} label="Tables">
+        <StyledTreeItem
+          nodeId={`${database}-tables`}
+          label="Tables"
+          onClick={() => console.log(foundTables)}
+        >
           {foundTables
             ? foundTables.map((database, index) => {
                 return renderTables(database.TABLE_NAME, index);
               })
             : null}
         </StyledTreeItem>
-        <StyledTreeItem nodeId={`${database}-procedures`} label="Procedures">
+        <StyledTreeItem
+          nodeId={`${database}-procedures`}
+          label="Procedures"
+          onClick={() => console.log(foundTables)}
+        >
           {foundProcedures
             ? foundProcedures.map((database, index) => {
                 return renderProcedures(database.ROUTINE_NAME, index);
               })
             : null}
         </StyledTreeItem>
-        <StyledTreeItem nodeId={`${database}-triggers`} label="Triggers">
-          {databases.map((database) => {
-            if (foundTrigger) {
-              if (database.database_name === foundTrigger.trigger_schema) {
-                return renderTriggers(foundTrigger.trigger_name, index);
-              }
-            }
-          })}
+        <StyledTreeItem
+          nodeId={`${database}-triggers`}
+          label="Triggers"
+          onClick={() => console.log(foundTables)}
+        >
+          {foundTrigger
+            ? foundTrigger.map((trigger, index) => {
+                if (database === trigger.trigger_schema) {
+                  return renderTriggers(trigger.trigger_name, index);
+                }
+              })
+            : null}
+        </StyledTreeItem>
+        <StyledTreeItem
+          nodeId={`${database}-views`}
+          label="Views"
+          onClick={() => console.log(foundTables)}
+        >
+          {foundView
+            ? foundView.map((view, index) => {
+                if (database === view.TABLE_SCHEMA) {
+                  return renderViews(view.TABLE_NAME, index);
+                }
+              })
+            : null}
+        </StyledTreeItem>
+        <StyledTreeItem
+          nodeId={`${database}-indexes`}
+          label="Indexes"
+          onClick={() => console.log(foundTables)}
+        >
+          {foundIndex
+            ? foundIndex.map((tableIndex, index) => {
+                if (database === tableIndex.TABLE_SCHEMA) {
+                  return renderIndexes(tableIndex.TABLE_NAME, index);
+                }
+              })
+            : null}
         </StyledTreeItem>
       </StyledTreeItem>
     );

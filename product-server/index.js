@@ -157,4 +157,26 @@ app.get("/views", (req, res) => {
     });
 });
 
+app.get("/indexes", (req, res) => {
+  pool
+    .getConnection()
+    .then((conn) => {
+      conn
+        .query(`SELECT * FROM INFORMATION_SCHEMA.STATISTICS`)
+        .then((result) => {
+          conn.end();
+          res.json({ data: result, success: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          conn.end();
+          res.json({ error: err, success: false });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.json({ error: err, success: false });
+    });
+});
+
 app.listen(port, () => console.log(`MariaDB app listening on port ${port}!`));
