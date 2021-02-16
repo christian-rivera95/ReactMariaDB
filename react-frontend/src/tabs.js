@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
 export default function SimpleTabs({ CurrentOpenTable }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
-
+  console.log(CurrentOpenTable);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -80,7 +80,9 @@ export default function SimpleTabs({ CurrentOpenTable }) {
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0}>
-        <CustomMaterialTable tableColumns={CurrentOpenTable} />
+        {CurrentOpenTable[0] ? (
+          <CustomMaterialTable tableColumns={CurrentOpenTable} />
+        ) : null}
       </TabPanel>
       <TabPanel value={value} index={1}>
         DATA
