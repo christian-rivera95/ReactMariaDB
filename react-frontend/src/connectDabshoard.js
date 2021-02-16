@@ -6,21 +6,8 @@ import { withStyles } from "@material-ui/core/styles";
 
 const styles = (theme) => ({
   div: {
+    backgroundColor: "#c2deef",
     border: "solid",
-  },
-  sidepanel: {
-    height: "618px",
-    maxHeight: "618px",
-    border: "solid",
-    borderWidth: "2px 2px 2px 2px",
-    marginBottom: "20px",
-    overflow: "scroll",
-  },
-  panel: {
-    border: "solid",
-    borderWidth: "2px 2px 2px 0px",
-    marginBottom: "20px",
-    overflow: "scroll",
   },
 });
 
@@ -54,11 +41,8 @@ export class ConnectDashboard extends Component {
             <Grid item xs={12}>
               <div style={{ marginTop: "10px" }}>Connect</div>
             </Grid>
-            <Grid item xs={3} className={classes.sidepanel}>
+            <Grid item xs={12} className={classes.sidepanel}>
               <CustomizedTreeView databases={databases} />
-            </Grid>
-            <Grid item xs={8} className={classes.panel}>
-              <div>Panel</div>
             </Grid>
           </Grid>
         </Container>

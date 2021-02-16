@@ -6,6 +6,8 @@ import TreeView from "@material-ui/lab/TreeView";
 import TreeItem from "@material-ui/lab/TreeItem";
 import Collapse from "@material-ui/core/Collapse";
 import { useSpring, animated } from "react-spring/web.cjs"; // web.cjs is required for IE 11 support
+import Grid from "@material-ui/core/Grid";
+import SimpleTabs from "./tabs";
 
 function MinusSquare(props) {
   return (
@@ -82,6 +84,22 @@ const useStyles = makeStyles({
     height: 264,
     flexGrow: 1,
     maxWidth: 400,
+  },
+  sidepanel: {
+    backgroundColor: "white",
+    height: "750px",
+    maxHeight: "750px",
+    border: "solid",
+    borderWidth: "2px 2px 2px 2px",
+    marginBottom: "20px",
+    overflow: "scroll",
+  },
+  panel: {
+    border: "solid",
+    borderWidth: "2px 2px 2px 0px",
+    marginBottom: "20px",
+    overflow: "scroll",
+    backgroundColor: "antiquewhite",
   },
 });
 
@@ -276,17 +294,26 @@ export default function CustomizedTreeView({ databases }) {
     );
   };
   return (
-    <TreeView
-      className={classes.root}
-      defaultCollapseIcon={<MinusSquare />}
-      defaultExpandIcon={<PlusSquare />}
-      defaultEndIcon={<CloseSquare />}
-    >
-      <StyledTreeItem nodeId="0" label="Databases">
-        {databases.map((database, index) => {
-          return renderTreeItems(database.database_name, index);
-        })}
-      </StyledTreeItem>
-    </TreeView>
+    <React.Fragment>
+      <Grid container spacing={3}>
+        <Grid item xs={4}>
+          <TreeView
+            className={classes.sidepanel}
+            defaultCollapseIcon={<MinusSquare />}
+            defaultExpandIcon={<PlusSquare />}
+            defaultEndIcon={<CloseSquare />}
+          >
+            <StyledTreeItem nodeId="0" label="Databases">
+              {databases.map((database, index) => {
+                return renderTreeItems(database.database_name, index);
+              })}
+            </StyledTreeItem>
+          </TreeView>
+        </Grid>
+        <Grid item xs={8}>
+          <SimpleTabs></SimpleTabs>
+        </Grid>
+      </Grid>
+    </React.Fragment>
   );
 }
