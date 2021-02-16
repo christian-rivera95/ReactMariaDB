@@ -89,6 +89,7 @@ export default function CustomizedTreeView({ databases }) {
   const classes = useStyles();
   const [Tables, setTables] = React.useState([]);
   const [Procedures, setProcedures] = React.useState([]);
+  const [Triggers, setTriggers] = React.useState([]);
 
   React.useEffect(() => {
     databases.map((database) => {
@@ -107,6 +108,10 @@ export default function CustomizedTreeView({ databases }) {
         )
         .catch((err) => console.error(err));
     });
+    fetch(`http://localhost:4000/triggers`)
+      .then((response) => response.json())
+      .then((response) => setTriggers(response.data))
+      .catch((err) => console.error(err));
   }, [databases]);
 
   const renderTables = (table, index) => {
@@ -137,12 +142,28 @@ export default function CustomizedTreeView({ databases }) {
     );
   };
 
+  const renderTriggers = (trigger, index) => {
+    let node = Math.floor(Math.random() * Math.floor(100));
+    return (
+      <StyledTreeItem
+        nodeId={`trigger-${index + node}`}
+        label={trigger}
+        key={trigger}
+      >
+        <StyledTreeItem nodeId={"node"} label="triggers"></StyledTreeItem>
+      </StyledTreeItem>
+    );
+  };
+
   const renderTreeItems = (database, index) => {
     const foundTables = Tables.find((element) =>
       element.find((element) => element.TABLE_SCHEMA === database)
     );
     const foundProcedures = Procedures.find((element) =>
       element.find((element) => element.ROUTINE_SCHEMA === database)
+    );
+    const foundTrigger = Triggers.find(
+      (element) => element.trigger_schema === database
     );
 
     return (
@@ -160,6 +181,15 @@ export default function CustomizedTreeView({ databases }) {
                 return renderProcedures(database.ROUTINE_NAME, index);
               })
             : null}
+        </StyledTreeItem>
+        <StyledTreeItem nodeId={`${database}-triggers`} label="Triggers">
+          {databases.map((database) => {
+            if (foundTrigger) {
+              if (database.database_name === foundTrigger.trigger_schema) {
+                return renderTriggers(foundTrigger.trigger_name, index);
+              }
+            }
+          })}
         </StyledTreeItem>
       </StyledTreeItem>
     );
