@@ -87,8 +87,8 @@ const useStyles = makeStyles({
   },
   sidepanel: {
     backgroundColor: "white",
-    height: "750px",
-    maxHeight: "750px",
+    height: "590px",
+    maxHeight: "590px",
     border: "solid",
     borderWidth: "2px 2px 2px 2px",
     marginBottom: "20px",
@@ -111,6 +111,7 @@ export default function CustomizedTreeView({ databases }) {
   const [Views, setViews] = React.useState([]);
   const [Indexes, setIndexes] = React.useState([]);
   const [Columns, setColumns] = React.useState([]);
+  const [CurrentOpenTable, setCurrentOpenTable] = React.useState([]);
 
   React.useEffect(() => {
     databases.map((database) => {
@@ -171,6 +172,9 @@ export default function CustomizedTreeView({ databases }) {
         nodeId={table + index}
         label={table}
         key={table + index + 1}
+        onClick={() => {
+          setCurrentOpenTable(columns);
+        }}
       >
         {columns
           ? columns.map((column) => {
@@ -311,7 +315,7 @@ export default function CustomizedTreeView({ databases }) {
           </TreeView>
         </Grid>
         <Grid item xs={8}>
-          <SimpleTabs></SimpleTabs>
+          <SimpleTabs CurrentOpenTable={CurrentOpenTable}></SimpleTabs>
         </Grid>
       </Grid>
     </React.Fragment>

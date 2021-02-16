@@ -7,7 +7,6 @@ import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import CustomMaterialTable from "./customMaterialTable";
-import { Container } from "@material-ui/core";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -57,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SimpleTabs() {
+export default function SimpleTabs({ CurrentOpenTable }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
 
@@ -81,34 +80,7 @@ export default function SimpleTabs() {
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0}>
-        <CustomMaterialTable
-          className={classes.table}
-          title="COLUMNS"
-          columns={[
-            { title: "Name", field: "name" },
-            { title: "Surname", field: "surname" },
-            { title: "Birth Year", field: "birthYear", type: "numeric" },
-            {
-              title: "Birth Place",
-              field: "birthCity",
-              lookup: { 34: "İstanbul", 63: "Şanlıurfa" },
-            },
-          ]}
-          data={[
-            {
-              name: "Mehmet",
-              surname: "Baran",
-              birthYear: 1987,
-              birthCity: 63,
-            },
-            {
-              name: "Zerya Betül",
-              surname: "Baran",
-              birthYear: 2017,
-              birthCity: 34,
-            },
-          ]}
-        />
+        <CustomMaterialTable tableColumns={CurrentOpenTable} />
       </TabPanel>
       <TabPanel value={value} index={1}>
         DATA
