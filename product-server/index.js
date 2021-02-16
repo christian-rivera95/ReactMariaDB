@@ -86,6 +86,31 @@ app.get("/tables", (req, res) => {
     });
 });
 
+app.get("/columns", (req, res) => {
+  const { schema } = req.query;
+  pool
+    .getConnection()
+    .then((conn) => {
+      conn
+        .query(
+          `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='${schema}'`
+        )
+        .then((result) => {
+          conn.end();
+          res.json({ data: result, success: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          conn.end();
+          res.json({ error: err, success: false });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.json({ error: err, success: false });
+    });
+});
+
 app.get("/procedures", (req, res) => {
   const { schema } = req.query;
   pool

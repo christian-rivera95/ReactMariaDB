@@ -92,6 +92,7 @@ export default function CustomizedTreeView({ databases }) {
   const [Triggers, setTriggers] = React.useState([]);
   const [Views, setViews] = React.useState([]);
   const [Indexes, setIndexes] = React.useState([]);
+  const [Columns, setColumns] = React.useState([]);
 
   React.useEffect(() => {
     databases.map((database) => {
@@ -107,6 +108,14 @@ export default function CustomizedTreeView({ databases }) {
         .then((response) => response.json())
         .then((response) =>
           setProcedures((oldArray) => [...oldArray, response.data])
+        )
+        .catch((err) => console.error(err));
+    });
+    databases.map((database) => {
+      fetch(`http://localhost:4000/columns?schema=${database.database_name}`)
+        .then((response) => response.json())
+        .then((response) =>
+          setColumns((oldArray) => [...oldArray, response.data])
         )
         .catch((err) => console.error(err));
     });
@@ -128,17 +137,29 @@ export default function CustomizedTreeView({ databases }) {
       .catch((err) => console.error(err));
   }, [databases]);
 
-  const renderTables = (table, index) => {
+  const renderColumns = (Column, index) => {
+    return (
+      <StyledTreeItem
+        nodeId={Column + index}
+        label={Column}
+        key={Column + index + 1}
+      ></StyledTreeItem>
+    );
+  };
+
+  const renderTables = (table, index, columns) => {
     return (
       <StyledTreeItem
         nodeId={table + index}
         label={table}
         key={table + index + 1}
       >
-        <StyledTreeItem
-          nodeId={`COLUMNS-${index + 1}`}
-          label="COLUMNS"
-        ></StyledTreeItem>
+        {columns
+          ? columns.map((column) => {
+              if (column.TABLE_NAME === table)
+                return renderColumns(column.COLUMN_NAME, index);
+            })
+          : null}
       </StyledTreeItem>
     );
   };
@@ -205,35 +226,26 @@ export default function CustomizedTreeView({ databases }) {
     const foundIndex = Indexes.find((element) =>
       element.find((element) => element.TABLE_SCHEMA === database)
     );
+    const foundColumn = Columns.find((element) =>
+      element.find((element) => element.TABLE_SCHEMA === database)
+    );
     return (
       <StyledTreeItem nodeId={database} label={database} key={index + 1}>
-        <StyledTreeItem
-          nodeId={`${database}-tables`}
-          label="Tables"
-          onClick={() => console.log(foundTables)}
-        >
+        <StyledTreeItem nodeId={`${database}-tables`} label="Tables">
           {foundTables
             ? foundTables.map((database, index) => {
-                return renderTables(database.TABLE_NAME, index);
+                return renderTables(database.TABLE_NAME, index, foundColumn);
               })
             : null}
         </StyledTreeItem>
-        <StyledTreeItem
-          nodeId={`${database}-procedures`}
-          label="Procedures"
-          onClick={() => console.log(foundTables)}
-        >
+        <StyledTreeItem nodeId={`${database}-procedures`} label="Procedures">
           {foundProcedures
             ? foundProcedures.map((database, index) => {
                 return renderProcedures(database.ROUTINE_NAME, index);
               })
             : null}
         </StyledTreeItem>
-        <StyledTreeItem
-          nodeId={`${database}-triggers`}
-          label="Triggers"
-          onClick={() => console.log(foundTables)}
-        >
+        <StyledTreeItem nodeId={`${database}-triggers`} label="Triggers">
           {foundTrigger
             ? foundTrigger.map((trigger, index) => {
                 if (database === trigger.trigger_schema) {
@@ -242,11 +254,7 @@ export default function CustomizedTreeView({ databases }) {
               })
             : null}
         </StyledTreeItem>
-        <StyledTreeItem
-          nodeId={`${database}-views`}
-          label="Views"
-          onClick={() => console.log(foundTables)}
-        >
+        <StyledTreeItem nodeId={`${database}-views`} label="Views">
           {foundView
             ? foundView.map((view, index) => {
                 if (database === view.TABLE_SCHEMA) {
@@ -255,11 +263,7 @@ export default function CustomizedTreeView({ databases }) {
               })
             : null}
         </StyledTreeItem>
-        <StyledTreeItem
-          nodeId={`${database}-indexes`}
-          label="Indexes"
-          onClick={() => console.log(foundTables)}
-        >
+        <StyledTreeItem nodeId={`${database}-indexes`} label="Indexes">
           {foundIndex
             ? foundIndex.map((tableIndex, index) => {
                 if (database === tableIndex.TABLE_SCHEMA) {
