@@ -22,7 +22,6 @@ app.get("/users", (req, res) => {
       conn
         .query("SELECT * FROM users")
         .then((result) => {
-          console.log(result);
           conn.end();
           res.json({ data: result, success: true });
         })
@@ -47,7 +46,6 @@ app.get("/databases", (req, res) => {
           "select schema_name as database_name from information_schema.schemata order by schema_name"
         )
         .then((result) => {
-          console.log(result);
           conn.end();
           res.json({ data: result, success: true });
         })
@@ -73,7 +71,31 @@ app.get("/tables", (req, res) => {
           `SELECT * FROM information_schema.tables WHERE table_schema=${schema}`
         )
         .then((result) => {
-          console.log(result);
+          conn.end();
+          res.json({ data: result, success: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          conn.end();
+          res.json({ error: err, success: false });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.json({ error: err, success: false });
+    });
+});
+
+app.get("/procedures", (req, res) => {
+  const { schema } = req.query;
+  pool
+    .getConnection()
+    .then((conn) => {
+      conn
+        .query(
+          `SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '${schema}'`
+        )
+        .then((result) => {
           conn.end();
           res.json({ data: result, success: true });
         })

@@ -88,6 +88,7 @@ const useStyles = makeStyles({
 export default function CustomizedTreeView({ databases }) {
   const classes = useStyles();
   const [Tables, setTables] = React.useState([]);
+  const [Procedures, setProcedures] = React.useState([]);
 
   React.useEffect(() => {
     databases.map((database) => {
@@ -95,6 +96,14 @@ export default function CustomizedTreeView({ databases }) {
         .then((response) => response.json())
         .then((response) =>
           setTables((oldArray) => [...oldArray, response.data])
+        )
+        .catch((err) => console.error(err));
+    });
+    databases.map((database) => {
+      fetch(`http://localhost:4000/procedures?schema=${database.database_name}`)
+        .then((response) => response.json())
+        .then((response) =>
+          setProcedures((oldArray) => [...oldArray, response.data])
         )
         .catch((err) => console.error(err));
     });
@@ -114,23 +123,47 @@ export default function CustomizedTreeView({ databases }) {
       </StyledTreeItem>
     );
   };
+
+  const renderProcedures = (procedure, index) => {
+    let node = Math.floor(Math.random() * Math.floor(100));
+    return (
+      <StyledTreeItem
+        nodeId={`procedure-${index + node}`}
+        label={procedure}
+        key={procedure}
+      >
+        <StyledTreeItem nodeId={"node"} label="Procedures"></StyledTreeItem>
+      </StyledTreeItem>
+    );
+  };
+
   const renderTreeItems = (database, index) => {
-    const found = Tables.find((element) =>
+    const foundTables = Tables.find((element) =>
       element.find((element) => element.TABLE_SCHEMA === database)
     );
+    const foundProcedures = Procedures.find((element) =>
+      element.find((element) => element.ROUTINE_SCHEMA === database)
+    );
+
     return (
       <StyledTreeItem nodeId={database} label={database} key={index + 1}>
         <StyledTreeItem nodeId={`${database}-tables`} label="Tables">
-          {found
-            ? found.map((database, index) => {
+          {foundTables
+            ? foundTables.map((database, index) => {
                 return renderTables(database.TABLE_NAME, index);
+              })
+            : null}
+        </StyledTreeItem>
+        <StyledTreeItem nodeId={`${database}-procedures`} label="Procedures">
+          {foundProcedures
+            ? foundProcedures.map((database, index) => {
+                return renderProcedures(database.ROUTINE_NAME, index);
               })
             : null}
         </StyledTreeItem>
       </StyledTreeItem>
     );
   };
-
   return (
     <TreeView
       className={classes.root}
