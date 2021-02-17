@@ -59,7 +59,6 @@ const useStyles = makeStyles((theme) => ({
 export default function SimpleTabs({ CurrentOpenTable }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
-  console.log(CurrentOpenTable);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
